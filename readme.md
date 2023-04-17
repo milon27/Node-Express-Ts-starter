@@ -1,3 +1,8 @@
+# how to run
+- clone the repo
+- npm install
+- npm run dev
+
 # setup a typescript backend
 
 ```bash
