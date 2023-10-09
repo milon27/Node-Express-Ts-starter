@@ -36,9 +36,10 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          echo "IMAGE_URL=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          # echo "IMAGE_URL=$(echo $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG)" >> "$GITHUB_OUTPUT"
-          echo "::set-output name=IMG_URL::$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "MILON27 = $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          # echo "::set-output name=IMG_URL::$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "IMAGE_URL=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          echo "MY_TEST=hello" >> "$GITHUB_OUTPUT"
 
   deploy:
     needs: build
@@ -59,7 +60,10 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Echo image url
-        run: echo "Docker image URL= ${{ steps.build-and-push.outputs.IMG_URL }}"
+        env:
+          OUTPUT1: ${{needs.build.outputs.IMAGE_URL}}
+          OUTPUT2: ${{needs.build.outputs.MY_TEST}}
+        run: echo "Docker image URL= $OUTPUT1 , $OUTPUT2"
 
       # - name: pull the images on ec2
       #   run: |
