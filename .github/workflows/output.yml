@@ -11,7 +11,8 @@ jobs:
       - name: Set Output
         id: set-output
         run: |
-          echo "::set-output name=myTest::hello1234"
+          # echo "::set-output name=myTest::hello1234"
+          echo "myTest=hello1234" >> $GITHUB_OUTPUT
     outputs:
       myTest: ${{ steps.set-output.outputs.myTest }}
 
