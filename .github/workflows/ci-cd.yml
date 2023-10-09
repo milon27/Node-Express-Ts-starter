@@ -36,10 +36,11 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          echo "MILON27 = $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          # echo "::set-output name=IMG_URL::$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           echo "IMAGE_URL=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
           echo "MY_TEST=hello" >> "$GITHUB_OUTPUT"
+    outputs:
+      IMAGE_URL: ${{ steps.build-and-push.outputs.IMAGE_URL }}
+      MY_TEST: ${{ steps.build-and-push.outputs.MY_TEST }}
 
   deploy:
     needs: build
@@ -61,18 +62,20 @@ jobs:
 
       - name: Echo image url
         env:
-          OUTPUT1: ${{needs.build.outputs.IMAGE_URL}}
-          OUTPUT2: ${{needs.build.outputs.MY_TEST}}
-        run: echo "Docker image URL= $OUTPUT1 , $OUTPUT2"
+          IMAGE_URL: ${{needs.build.outputs.IMAGE_URL}}
+          MY_TEST: ${{needs.build.outputs.MY_TEST}}
+        run: echo "Docker image URL= $IMAGE_URL , $MY_TEST"
 
-      # - name: pull the images on ec2
-      #   run: |
-      #     sudo docker pull $IMAGE_URL
-      #     sudo docker stop demo-backend || true
-      #     sudo docker rm demo-backend || true
-      #     sudo docker run  -d -p 80:4000 --name demo-backend --restart always $IMAGE_URL
+      - name: pull the images on ec2
+        env:
+          IMAGE_URL: ${{needs.build.outputs.IMAGE_URL}}
+        run: |
+          sudo docker pull $IMAGE_URL
+          sudo docker stop demo-backend || true
+          sudo docker rm demo-backend || true
+          sudo docker run  -d -p 80:4000 --name demo-backend --restart always $IMAGE_URL
 
-      # - name: Purge Unused Docker Images
-      #   run: |
-      #     sleep 10
-      #     sudo docker image prune --all -f
+      - name: Purge Unused Docker Images
+        run: |
+          sleep 10
+          sudo docker image prune --all -f
