@@ -1,0 +1,45 @@
+name: Docker CI
+
+on:
+  push:
+    branches: [prod]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout all code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: demo-node-action-ecr-ec2
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+  # deploy:
+  #   needs: build
+  #   runs-on: [self-hosted, prod]
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: pull the images & run
+  #       env:
+  #         DOCKER_USER: milon
+  #         DOCKER_PASS: fdsdfs
+  #       run: echo $DOCKER_USER $DOCKER_PASS #bash init.sh # init.sh once,run.sh from next time
