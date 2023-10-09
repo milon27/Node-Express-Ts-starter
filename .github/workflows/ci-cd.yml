@@ -36,7 +36,9 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          echo "IMAGE_URL=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          # 509316050398.dkr.ecr.us-east-1.amazonaws.com/demo-node-action-ecr-ec2:8bd9cf82ea05513226c436afebb31fb7f72c4576
+          # 509316050398.dkr.ecr.us-east-1.amazonaws.com/demo-node-action-ecr-ec2:562ad6fb5887b320882f953e403d5b9cdcebde00
+          echo "IMAGE_URL=$REGISTRY/$REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
           echo "MY_TEST=hello" >> "$GITHUB_OUTPUT"
     outputs:
       IMAGE_URL: ${{ steps.build-and-push.outputs.IMAGE_URL }}
