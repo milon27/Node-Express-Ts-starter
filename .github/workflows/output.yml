@@ -7,14 +7,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: production
-
     steps:
-      - name: Checkout all code
-        uses: actions/checkout@v3
-
       - name: Set Output
-        run: echo "MY_TEST=hello1234" >> "$GITHUB_OUTPUT"
+        id: set-output
+        run: |
+          echo "::set-output name=myTest::hello1234"
+    outputs:
+      myTest: ${{ steps.set-output.outputs.myTest }}
 
   deploy:
     needs: build
@@ -23,7 +22,4 @@ jobs:
 
     steps:
       - name: get Output
-        env:
-          OUTPUT1: ${{needs.build.outputs.output1}}
-          OUTPUT2: ${{needs.build.outputs.MY_TEST}}
-        run: echo "hey, $OUTPUT1, $OUTPUT2"
+        run: echo "hey, ${{ needs.build.outputs.myTest }}"
