@@ -4,6 +4,9 @@ on:
   push:
     branches: [prod]
 
+env:
+  AWS_REGION: us-east-1
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,7 +21,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: $AWS_REGION
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -32,8 +35,9 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          echo $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "IMAGE_URL=$(echo $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG)" >> "$GITHUB_OUTPUT"
+          echo "IMAGE_URL=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          # echo "IMAGE_URL=$(echo $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG)" >> "$GITHUB_OUTPUT"
+          echo "IMAGE_URL=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
   deploy:
     needs: build
@@ -47,17 +51,17 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: $AWS_REGION
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Echo image url
+        run: echo $IMAGE_URL
+
       - name: pull the images on ec2
-        env:
-          IMAGE_URL: ${{ needs.build.outputs.IMAGE_URL }}
         run: |
-          echo $IMAGE_URL
           sudo docker pull $IMAGE_URL
           sudo docker stop demo-backend || true
           sudo docker rm demo-backend || true
