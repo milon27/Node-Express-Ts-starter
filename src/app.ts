@@ -1,10 +1,14 @@
-import express from 'express'
+import { config } from "dotenv";
+import express, { Request, Response } from "express";
 
-const app = express()
+config();
 
+const app = express();
 
-app.get('/', (req, res) => {
-    res.send("okk")
-})
+app.get("/", (req: Request, res: Response) => {
+  res.send("Welcome 🚀");
+});
 
-app.listen(process.env.PORT, () => console.log("running on app:2727"))
+const port = process.env.PORT;
+
+app.listen(port, () => console.log(`Api running on port ${port}`));

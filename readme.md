@@ -1,4 +1,5 @@
 # how to run
+
 - clone the repo
 - npm install
 - npm run dev
@@ -20,45 +21,49 @@ npx tsc --init # config it
 
 ```json
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "CommonJS", /* Specify what module code is generated. */
-        "rootDir": "./src", /* Specify the root folder within your source files. */
-        "outDir": "./dist",
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "strict": true, 
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "noImplicitThis": true,
-        "alwaysStrict": true,
-        "skipLibCheck": true ,
-        "allowSyntheticDefaultImports": true, /* Allow 'import x from y' when a module doesn't have a default export. */
-    }
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS" /* Specify what module code is generated. */,
+    "rootDir": "./src" /* Specify the root folder within your source files. */,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true /* Allow 'import x from y' when a module doesn't have a default export. */
+  }
 }
-
-
 ```
 
 package.json
+
 ```json
 "scripts": {
-    "dev": "nodemon ./src/app.ts"
-}
+    "dev": "nodemon ./src/app.ts",
+    "start": "node ./dist/app.js",
+    "build": "tsc"
+},
 ```
 
 <!-- app.ts -->
 
 ```ts
-import express from 'express'
+import { config } from "dotenv";
+import express, { Request, Response } from "express";
 
-const app = express()
+config();
 
+const app = express();
 
-app.get('/', (req, res) => {
-    res.send("okk")
-})
+app.get("/", (req: Request, res: Response) => {
+  res.send("Welcome 🚀");
+});
 
-app.listen(process.env.PORT, () => console.log("running on app:2727"))
+const port = process.env.PORT;
 
+app.listen(port, () => console.log(`Api running on port ${port}`));
 ```
