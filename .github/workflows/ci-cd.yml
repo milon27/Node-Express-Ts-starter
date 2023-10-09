@@ -28,6 +28,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, tag, and push docker image to Amazon ECR
+        id: build-and-push
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: demo-node-action-ecr-ec2
@@ -37,7 +38,7 @@ jobs:
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
           echo "IMAGE_URL=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           # echo "IMAGE_URL=$(echo $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG)" >> "$GITHUB_OUTPUT"
-          echo "IMAGE_URL=$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+          echo "::set-output name=IMG_URL::$REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
   deploy:
     needs: build
@@ -58,16 +59,16 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Echo image url
-        run: echo "IMAGE_URL => $IMAGE_URL"
+        run: echo "Docker image URL= ${{ steps.build-and-push.outputs.IMG_URL }}"
 
-      - name: pull the images on ec2
-        run: |
-          sudo docker pull $IMAGE_URL
-          sudo docker stop demo-backend || true
-          sudo docker rm demo-backend || true
-          sudo docker run  -d -p 80:4000 --name demo-backend --restart always $IMAGE_URL
+      # - name: pull the images on ec2
+      #   run: |
+      #     sudo docker pull $IMAGE_URL
+      #     sudo docker stop demo-backend || true
+      #     sudo docker rm demo-backend || true
+      #     sudo docker run  -d -p 80:4000 --name demo-backend --restart always $IMAGE_URL
 
-      - name: Purge Unused Docker Images
-        run: |
-          sleep 10
-          sudo docker image prune --all -f
+      # - name: Purge Unused Docker Images
+      #   run: |
+      #     sleep 10
+      #     sudo docker image prune --all -f
