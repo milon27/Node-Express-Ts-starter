@@ -32,14 +32,38 @@ jobs:
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          echo $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "IMAGE_URL=$(echo $REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG)" >> "$GITHUB_OUTPUT"
 
-  # deploy:
-  #   needs: build
-  #   runs-on: [self-hosted, prod]
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: pull the images & run
-  #       env:
-  #         DOCKER_USER: milon
-  #         DOCKER_PASS: fdsdfs
-  #       run: echo $DOCKER_USER $DOCKER_PASS #bash init.sh # init.sh once,run.sh from next time
+  deploy:
+    needs: build
+    runs-on: [self-hosted, prod]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: pull the images on ec2
+        env:
+          IMAGE_URL: ${{ needs.build.outputs.IMAGE_URL }}
+        run: |
+          echo $IMAGE_URL
+          sudo docker pull $IMAGE_URL
+          sudo docker stop demo-backend || true
+          sudo docker rm demo-backend || true
+          sudo docker run  -d -p 80:4000 --name demo-backend --restart always $IMAGE_URL
+
+      - name: Purge Unused Docker Images
+        run: |
+          sleep 10
+          sudo docker image prune --all -f
