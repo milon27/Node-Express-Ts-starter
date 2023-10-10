@@ -5,3 +5,4 @@
 Dockerfile
 *.md
 .pnpm-debug.log
+todo.md
