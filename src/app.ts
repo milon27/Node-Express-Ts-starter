@@ -7,7 +7,7 @@ const app = express();
 
 app.get("/", (req: Request, res: Response) => {
   console.log("logging on / route");
-  res.send("Welcome 🚀");
+  res.send("Welcome from ec2 🚀");
 });
 
 const port = process.env.PORT;

@@ -62,8 +62,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-        # aws ecr get-login-password --region region | docker login --username AWS --password-stdin aws_account_id.dkr.ecr.region.amazonaws.com
-
       - name: Echo image url
         env:
           IMAGE_URL: ${{needs.build.outputs.IMAGE_URL}}
