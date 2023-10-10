@@ -74,10 +74,10 @@ jobs:
         env:
           IMAGE_URL: ${{needs.build.outputs.IMAGE_URL}}
         run: |
-          sudo docker pull $IMAGE_URL
-          sudo docker stop demo-backend || true
-          sudo docker rm demo-backend || true
-          sudo docker run  -d -p 80:4000 --name demo-backend --restart always $IMAGE_URL
+          docker pull $IMAGE_URL
+          docker stop demo-backend || true
+          docker rm demo-backend || true
+          docker run  -d -p 80:4000 --name demo-backend --restart always $IMAGE_URL
 
       - name: Purge Unused Docker Images
         run: |
